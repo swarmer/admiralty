@@ -2,9 +2,8 @@ VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define "master" do |master|
-    master.vm.box = "AntonioMeireles/coreos-stable"
-
-    master.vm.network "public_network"
+    master.vm.box = "ubuntu/vivid64"
+    master.vm.network "private_network", ip: "192.168.130.10"
 
     master.vm.provider "virtualbox" do |vbox|
       vbox.name = "kubernetes-master"
@@ -14,9 +13,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   config.vm.define "minion-1" do |minion|
-    minion.vm.box = "AntonioMeireles/coreos-stable"
+    minion.vm.box = "ubuntu/vivid64"
 
-    minion.vm.network "public_network"
+    minion.vm.network "private_network", ip: "192.168.130.11"
 
     minion.vm.provider "virtualbox" do |vbox|
       vbox.name = "kubernetes-minion-1"
@@ -26,9 +25,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   config.vm.define "minion-2" do |minion|
-    minion.vm.box = "AntonioMeireles/coreos-stable"
+    minion.vm.box = "ubuntu/vivid64"
 
-    minion.vm.network "public_network"
+    minion.vm.network "private_network", ip: "192.168.130.12"
 
     minion.vm.provider "virtualbox" do |vbox|
       vbox.name = "kubernetes-minion-2"
