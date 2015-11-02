@@ -1,6 +1,7 @@
 ---
 - hosts: kubernetes-master
-  sudo: true
+  vars:
+    flannel_range: 10.1.0.0/16
   tasks:
     - name: Ensure required packages are at latest versions
       apt: pkg={{ item }} state=latest
@@ -14,3 +15,33 @@
         - htop
         - docker.io
         - bridge-utils
+      become: true
+
+    - name: Run bootstrap docker
+      shell: docker -d -H unix:///var/run/docker-bootstrap.sock
+        -p /var/run/docker-bootstrap.pid --iptables=false --ip-masq=false
+        --bridge=none --graph=/var/lib/docker-bootstrap
+        2> /var/log/docker-bootstrap.log
+        1> /dev/null &
+      become: true
+
+    - name: Run etcd on bootstrap docker
+      shell: docker -H unix:///var/run/docker-bootstrap.sock run
+        --net=host -d gcr.io/google_containers/etcd:2.0.12
+        /usr/local/bin/etcd --addr=127.0.0.1:4001 --bind-addr=0.0.0.0:4001
+        --data-dir=/var/etcd/data
+      become: true
+
+    - name: Set flannel address range
+      shell: 'docker -H unix:///var/run/docker-bootstrap.sock run
+        --net=host gcr.io/google_containers/etcd:2.0.12
+        etcdctl set /coreos.com/network/config ''{ "Network": "{{ flannel_range }}" }'''
+
+    - name: Stop main docker to be reconfigured by flannel
+      service: name=docker state=stopped
+
+    - name: Start flannel on bootstrap docker
+      shell: docker -H unix:///var/run/docker-bootstrap.sock run -d --net=host
+        --privileged -v /dev/net:/dev/net quay.io/coreos/flannel:0.5.0
+      register:
+        flannel
