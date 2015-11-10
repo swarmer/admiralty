@@ -11,5 +11,5 @@ while true; do
     fi
 done
 
-ifconfig docker0 down
-brctl delbr docker0
+ifconfig docker0 down || true
+brctl delbr docker0 || true
