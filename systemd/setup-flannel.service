@@ -2,6 +2,7 @@
 Description=Setup docker to use flannel settings
 Requires=flannel.service
 After=flannel.service
+Before=docker.service
 
 [Service]
 Type=oneshot

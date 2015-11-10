@@ -10,3 +10,6 @@ while true; do
         break
     fi
 done
+
+ifconfig docker0 down
+brctl delbr docker0

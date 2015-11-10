@@ -3,7 +3,7 @@
   become: yes
 
   vars:
-    flannel_range: 10.1.0.0/16
+    flannel_range: 10.130.0.0/16
 
   tasks:
     - name: Disable involved services
@@ -91,14 +91,6 @@
 
     - name: Enable setup-flannel service
       service: name=setup-flannel enabled=yes state=started
-
-    - name: Disable docker0
-      command: ifconfig docker0 down
-      ignore_errors: yes
-
-    - name: Remove docker0
-      command: brctl delbr docker0
-      ignore_errors: yes
 
     - name: Enable main docker
       service: name=docker enabled=yes state=started
