@@ -1,0 +1,9 @@
+[Unit]
+Description=Bootstrap docker
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/docker -d -H unix:///var/run/docker-bootstrap.sock -p /var/run/docker-bootstrap.pid --iptables=false --ip-masq=false --bridge=none --graph=/var/lib/docker-bootstrap
+
+[Install]
+WantedBy=multi-user.target

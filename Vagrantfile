@@ -2,7 +2,7 @@ VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define "master" do |master|
-    master.vm.box = "ubuntu/vivid64"
+    master.vm.box = "ubuntu/wily64"
     master.vm.network "private_network", ip: "192.168.130.10"
 
     master.vm.provider "virtualbox" do |vbox|

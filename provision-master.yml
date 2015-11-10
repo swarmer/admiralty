@@ -1,8 +1,21 @@
 ---
 - hosts: kubernetes-master
+  become: yes
+
   vars:
     flannel_range: 10.1.0.0/16
+
   tasks:
+    - name: Disable involved services
+      service: name="{{ item }}" state=stopped
+      with_items:
+        - kubernetes-service-proxy
+        - kubernetes-master
+        - docker
+        - flannel
+        - etcd
+        - bootstrap-docker
+
     - name: Ensure required packages are at latest versions
       apt: pkg={{ item }} state=latest
       with_items:
@@ -15,33 +28,72 @@
         - htop
         - docker.io
         - bridge-utils
-      become: true
 
-    - name: Run bootstrap docker
-      shell: docker -d -H unix:///var/run/docker-bootstrap.sock
-        -p /var/run/docker-bootstrap.pid --iptables=false --ip-masq=false
-        --bridge=none --graph=/var/lib/docker-bootstrap
-        2> /var/log/docker-bootstrap.log
-        1> /dev/null &
-      become: true
+    - name: Copy bootstrap docker systemd config
+      copy: src=systemd/bootstrap-docker.service
+        dest=/etc/systemd/system/bootstrap-docker.service
+        owner=root group=root mode=0644
 
-    - name: Run etcd on bootstrap docker
-      shell: docker -H unix:///var/run/docker-bootstrap.sock run
-        --net=host -d gcr.io/google_containers/etcd:2.0.12
-        /usr/local/bin/etcd --addr=127.0.0.1:4001 --bind-addr=0.0.0.0:4001
-        --data-dir=/var/etcd/data
-      become: true
+    - name: Copy etcd systemd config
+      copy: src=systemd/etcd.service
+        dest=/etc/systemd/system/etcd.service
+        owner=root group=root mode=0644
 
-    - name: Set flannel address range
-      shell: 'docker -H unix:///var/run/docker-bootstrap.sock run
-        --net=host gcr.io/google_containers/etcd:2.0.12
-        etcdctl set /coreos.com/network/config ''{ "Network": "{{ flannel_range }}" }'''
+    - name: Copy etcd waiter
+      copy: src=etcd_waiter.sh dest=/usr/local/bin/etcd_waiter.sh
+        owner=root group=root mode=0755
 
-    - name: Stop main docker to be reconfigured by flannel
-      service: name=docker state=stopped
+    - name: Copy etcd waiter systemd config
+      template: src=systemd/etcd-waiter.service
+        dest=/etc/systemd/system/etcd-waiter.service
+        owner=root group=root mode=0644
 
-    - name: Start flannel on bootstrap docker
-      shell: docker -H unix:///var/run/docker-bootstrap.sock run -d --net=host
-        --privileged -v /dev/net:/dev/net quay.io/coreos/flannel:0.5.0
-      register:
-        flannel
+    - name: Copy flannel systemd config
+      template: src=systemd/flannel.service
+        dest=/etc/systemd/system/flannel.service
+        owner=root group=root mode=0644
+
+    - name: Copy kubernetes master systemd config
+      copy: src=systemd/kubernetes-master.service
+        dest=/etc/systemd/system/kubernetes-master.service
+        owner=root group=root mode=0644
+
+    - name: Copy kubernetes service proxy systemd config
+      copy: src=systemd/kubernetes-service-proxy.service
+        dest=/etc/systemd/system/kubernetes-service-proxy.service
+        owner=root group=root mode=0644
+
+    - name: Reload systemd configs
+      command: systemctl daemon-reload
+
+    - name: Enable bootstrap docker service
+      service: name=bootstrap-docker enabled=yes state=started
+
+    - name: Enable etcd service
+      service: name=etcd enabled=yes state=started
+
+    - name: Enable etcd waiter service
+      service: name=etcd-waiter enabled=yes state=started
+
+    - name: Enable flannel service
+      service: name=flannel enabled=yes state=started
+
+    - name: Setup flannel to be used by docker
+      script: setup_flannel.sh
+
+    - name: Disable docker0
+      command: ifconfig docker0 down
+      ignore_errors: yes
+
+    - name: Remove docker0
+      command: brctl delbr docker0
+      ignore_errors: yes
+
+    - name: Enable main docker
+      service: name=docker enabled=yes state=started
+
+    - name: Enable kubernetes master service
+      service: name=kubernetes-master enabled=yes state=started
+
+    - name: Enable kubernetes service proxy service
+      service: name=kubernetes-service-proxy enabled=yes state=started

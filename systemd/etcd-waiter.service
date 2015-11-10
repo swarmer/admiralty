@@ -1,0 +1,13 @@
+[Unit]
+Description=Waits until etcd starts completely
+Requires=bootstrap-docker.service
+Requires=etcd.service
+After=bootstrap-docker.service
+After=etcd.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/etcd_waiter.sh
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,16 @@
+[Unit]
+Description=flannel on bootstrap docker
+Requires=bootstrap-docker.service
+Requires=etcd.service
+Requires=etcd-waiter.service
+After=bootstrap-docker.service
+After=etcd.service
+After=etcd-waiter.service
+
+[Service]
+Type=simple
+ExecStartPre=/usr/bin/docker -H unix:///var/run/docker-bootstrap.sock run --net=host gcr.io/google_containers/etcd:2.0.12 etcdctl set /coreos.com/network/config '{ "Network": "{{ flannel_range }}" }'
+ExecStart=/usr/bin/docker -H unix:///var/run/docker-bootstrap.sock run --net=host --privileged -v /dev/net:/dev/net quay.io/coreos/flannel:0.5.0
+
+[Install]
+WantedBy=multi-user.target
