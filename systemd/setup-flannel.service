@@ -1,0 +1,11 @@
+[Unit]
+Description=Setup docker to use flannel settings
+Requires=flannel.service
+After=flannel.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/setup_flannel.sh
+
+[Install]
+WantedBy=multi-user.target

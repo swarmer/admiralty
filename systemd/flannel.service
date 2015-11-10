@@ -9,6 +9,8 @@ After=etcd-waiter.service
 
 [Service]
 Type=simple
+Restart=on-failure
+RestartSec=5
 ExecStartPre=/usr/bin/docker -H unix:///var/run/docker-bootstrap.sock run --net=host gcr.io/google_containers/etcd:2.0.12 etcdctl set /coreos.com/network/config '{ "Network": "{{ flannel_range }}" }'
 ExecStart=/usr/bin/docker -H unix:///var/run/docker-bootstrap.sock run --net=host --privileged -v /dev/net:/dev/net quay.io/coreos/flannel:0.5.0
 

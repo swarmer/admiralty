@@ -6,7 +6,7 @@ After=bootstrap-docker.service
 After=etcd.service
 
 [Service]
-Type=simple
+Type=oneshot
 ExecStart=/usr/local/bin/etcd_waiter.sh
 
 [Install]

@@ -12,7 +12,9 @@
         - kubernetes-service-proxy
         - kubernetes-master
         - docker
+        - setup-flannel
         - flannel
+        - etcd-waiter
         - etcd
         - bootstrap-docker
 
@@ -53,6 +55,15 @@
         dest=/etc/systemd/system/flannel.service
         owner=root group=root mode=0644
 
+    - name: Copy flannel setup script
+      copy: src=setup_flannel.sh dest=/usr/local/bin/setup_flannel.sh
+        owner=root group=root mode=0755
+
+    - name: Copy setup-flannel systemd config
+      template: src=systemd/setup-flannel.service
+        dest=/etc/systemd/system/setup-flannel.service
+        owner=root group=root mode=0644
+
     - name: Copy kubernetes master systemd config
       copy: src=systemd/kubernetes-master.service
         dest=/etc/systemd/system/kubernetes-master.service
@@ -78,8 +89,8 @@
     - name: Enable flannel service
       service: name=flannel enabled=yes state=started
 
-    - name: Setup flannel to be used by docker
-      script: setup_flannel.sh
+    - name: Enable setup-flannel service
+      service: name=setup-flannel enabled=yes state=started
 
     - name: Disable docker0
       command: ifconfig docker0 down
