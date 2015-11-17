@@ -1,0 +1,15 @@
+[Unit]
+Description=flannel on bootstrap docker
+Requires=bootstrap-docker.service
+Requires=etcd-waiter.service
+After=bootstrap-docker.service
+After=etcd-waiter.service
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=5
+ExecStart=/usr/bin/docker -H unix:///var/run/docker-bootstrap.sock run --net=host --privileged -v /dev/net:/dev/net quay.io/coreos/flannel:0.5.0 /opt/bin/flanneld --etcd-endpoints=http://{{ kubernetes_master_ip }}:4001
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,15 @@
+[Unit]
+Description=Kubernetes service proxy
+Requires=setup-flannel.service
+Requires=kubernetes-master.service
+After=setup-flannel.service
+After=kubernetes-master.service
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=5
+ExecStart=/usr/bin/docker run --net=host --privileged gcr.io/google_containers/hyperkube:v1.0.1 /hyperkube proxy --master=http://{{ kubernetes_master_ip }}:8080 --v=2
+
+[Install]
+WantedBy=multi-user.target

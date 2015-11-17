@@ -1,0 +1,28 @@
+[Unit]
+Description=Kubernetes master
+Requires=etcd.service
+Requires=setup-flannel.service
+Requires=docker.service
+After=etcd.service
+After=setup-flannel.service
+After=docker.service
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=5
+ExecStart=/usr/bin/docker run \
+    --volume=/:/rootfs:ro \
+    --volume=/sys:/sys:ro \
+    --volume=/dev:/dev \
+    --volume=/var/lib/docker/:/var/lib/docker:rw \
+    --volume=/var/lib/kubelet/:/var/lib/kubelet:rw \
+    --volume=/var/run:/var/run:rw \
+    --net=host \
+    --privileged=true \
+    --pid=host \
+    --rm \
+    gcr.io/google_containers/hyperkube:v1.0.1 /hyperkube kubelet --api-servers=http://localhost:8080 --v=2 --address=0.0.0.0 --enable-server --hostname-override=127.0.0.1 --config=/etc/kubernetes/manifests-multi --cluster-dns=10.0.0.10 --cluster-domain=cluster.local
+
+[Install]
+WantedBy=multi-user.target

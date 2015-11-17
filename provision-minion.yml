@@ -1,10 +1,10 @@
 ---
-- hosts: kubernetes-master
+- hosts: kubernetes-minion
   become: yes
 
   vars:
-    kubernetes_master_ip: 127.0.0.1
-    flannel_range: 10.130.0.0/16
+    # pass that as a command line argument
+    kubernetes_master_ip: 0.0.0.0
 
   tasks:
     - name: Disable involved services
@@ -37,22 +37,17 @@
         dest=/etc/systemd/system/bootstrap-docker.service
         owner=root group=root mode=0644
 
-    - name: Copy etcd systemd config
-      copy: src=systemd/master/etcd.service
-        dest=/etc/systemd/system/etcd.service
-        owner=root group=root mode=0644
-
     - name: Copy etcd waiter
       template: src=scripts/etcd_waiter.sh dest=/usr/local/bin/etcd_waiter.sh
         owner=root group=root mode=0755
 
     - name: Copy etcd waiter systemd config
-      copy: src=systemd/master/etcd-waiter.service
+      copy: src=systemd/minion/etcd-waiter.service
         dest=/etc/systemd/system/etcd-waiter.service
         owner=root group=root mode=0644
 
     - name: Copy flannel systemd config
-      template: src=systemd/master/flannel.service
+      template: src=systemd/minion/flannel.service
         dest=/etc/systemd/system/flannel.service
         owner=root group=root mode=0644
 
@@ -66,27 +61,20 @@
         owner=root group=root mode=0644
 
     - name: Copy kubernetes master systemd config
-      template: src=systemd/master/kubernetes-master.service
+      template: src=systemd/minion/kubernetes-master.service
         dest=/etc/systemd/system/kubernetes-master.service
         owner=root group=root mode=0644
 
     - name: Copy kubernetes service proxy systemd config
-      template: src=systemd/master/kubernetes-service-proxy.service
+      template: src=systemd/minion/kubernetes-service-proxy.service
         dest=/etc/systemd/system/kubernetes-service-proxy.service
         owner=root group=root mode=0644
-
-    - name: Download kubectl
-      get_url: url=https://storage.googleapis.com/kubernetes-release/release/v1.0.1/bin/linux/amd64/kubectl
-        dest=/usr/local/bin/kubectl mode=0755
 
     - name: Reload systemd configs
       command: systemctl daemon-reload
 
     - name: Enable bootstrap docker service
       service: name=bootstrap-docker enabled=yes state=started
-
-    - name: Enable etcd service
-      service: name=etcd enabled=yes state=started
 
     - name: Enable etcd waiter service
       service: name=etcd-waiter enabled=yes state=started

@@ -1,10 +1,10 @@
 [Unit]
 Description=Kubernetes service proxy
 Requires=etcd.service
-Requires=flannel.service
+Requires=setup-flannel.service
 Requires=kubernetes-master.service
 After=etcd.service
-After=flannel.service
+After=setup-flannel.service
 After=kubernetes-master.service
 
 [Service]
