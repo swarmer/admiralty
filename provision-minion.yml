@@ -60,6 +60,14 @@
         dest=/etc/systemd/system/setup-flannel.service
         owner=root group=root mode=0644
 
+    - name: Create docker override config dir
+      file: path=/etc/systemd/system/docker.service.d/ state=directory
+
+    - name: Copy docker override config
+      copy: src=systemd/docker-override.conf
+        dest=/etc/systemd/system/docker.service.d/override.conf
+        owner=root group=root mode=0644
+
     - name: Copy kubernetes master systemd config
       template: src=systemd/minion/kubernetes-master.service
         dest=/etc/systemd/system/kubernetes-master.service
