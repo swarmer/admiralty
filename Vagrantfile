@@ -11,6 +11,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vbox.cpus = 1
     end
 
+    master.vm.provision :shell, inline: "hostnamectl set-hostname kubernetes-master"
+
     master.vm.provision "ansible" do |ansible|
       ansible.playbook = "provision-master.yml"
       ansible.groups = {"kubernetes-master" => ["master"]}
@@ -26,6 +28,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vbox.memory = 512
       vbox.cpus = 1
     end
+
+    minion.vm.provision :shell, inline: "hostnamectl set-hostname kubernetes-minion1"
 
     minion.vm.provision "ansible" do |ansible|
       ansible.playbook = "provision-minion.yml"

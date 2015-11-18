@@ -7,18 +7,6 @@
     kubernetes_master_ip: 0.0.0.0
 
   tasks:
-    - name: Disable involved services
-      service: name="{{ item }}" state=stopped
-      with_items:
-        - kubernetes-service-proxy
-        - kubernetes-master
-        - docker
-        - setup-flannel
-        - flannel
-        - etcd-waiter
-        - etcd
-        - bootstrap-docker
-
     - name: Ensure required packages are at latest versions
       apt: pkg={{ item }} state=latest
       with_items:
@@ -31,6 +19,18 @@
         - htop
         - docker.io
         - bridge-utils
+
+    - name: Disable involved services
+      service: name="{{ item }}" state=stopped
+      with_items:
+        - kubernetes-service-proxy
+        - kubernetes-master
+        - docker
+        - setup-flannel
+        - flannel
+        - etcd-waiter
+        - etcd
+        - bootstrap-docker
 
     - name: Copy bootstrap docker systemd config
       copy: src=systemd/bootstrap-docker.service
