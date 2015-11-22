@@ -2,10 +2,6 @@
 - hosts: kubernetes-minion
   become: yes
 
-  vars:
-    # pass that as a command line argument
-    kubernetes_master_ip: 0.0.0.0
-
   tasks:
     - name: Ensure required packages are at latest versions
       apt: pkg={{ item }} state=latest
@@ -42,7 +38,7 @@
         owner=root group=root mode=0755
 
     - name: Copy etcd waiter systemd config
-      copy: src=systemd/minion/etcd-waiter.service
+      template: src=systemd/minion/etcd-waiter.service
         dest=/etc/systemd/system/etcd-waiter.service
         owner=root group=root mode=0644
 

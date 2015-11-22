@@ -3,7 +3,6 @@
   become: yes
 
   vars:
-    kubernetes_master_ip: 127.0.0.1
     flannel_range: 10.130.0.0/16
 
   tasks:
@@ -38,7 +37,7 @@
         owner=root group=root mode=0644
 
     - name: Copy etcd systemd config
-      copy: src=systemd/master/etcd.service
+      template: src=systemd/master/etcd.service
         dest=/etc/systemd/system/etcd.service
         owner=root group=root mode=0644
 
@@ -47,7 +46,7 @@
         owner=root group=root mode=0755
 
     - name: Copy etcd waiter systemd config
-      copy: src=systemd/master/etcd-waiter.service
+      template: src=systemd/master/etcd-waiter.service
         dest=/etc/systemd/system/etcd-waiter.service
         owner=root group=root mode=0644
 

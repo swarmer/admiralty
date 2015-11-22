@@ -16,6 +16,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     master.vm.provision "ansible" do |ansible|
       ansible.playbook = "provision-master.yml"
       ansible.groups = {"kubernetes-master" => ["master"]}
+      ansible.extra_vars = {
+        "private_ip" => "192.168.130.10",
+        "master_private_ip" => "192.168.130.10"
+      }
     end
   end
 
@@ -34,7 +38,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     minion.vm.provision "ansible" do |ansible|
       ansible.playbook = "provision-minion.yml"
       ansible.groups = {"kubernetes-minion" => ["minion-1"]}
-      ansible.extra_vars = {"kubernetes_master_ip" => "192.168.130.10"}
+      ansible.extra_vars = {
+        "private_ip" => "192.168.130.11",
+        "master_private_ip" => "192.168.130.10"
+      }
     end
   end
 end

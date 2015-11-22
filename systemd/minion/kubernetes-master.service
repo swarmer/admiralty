@@ -19,7 +19,7 @@ ExecStart=/usr/bin/docker run \
     --net=host \
     --privileged=true \
     --pid=host \
-    gcr.io/google_containers/hyperkube:v1.1.1 /hyperkube kubelet --api-servers=http://{{ kubernetes_master_ip }}:8080 --v=2 --address=0.0.0.0 --enable-server --hostname-override={{ ansible_default_ipv4.address }} --cluster-dns=10.0.0.10 --cluster-domain=cluster.local
+    gcr.io/google_containers/hyperkube:v1.1.1 /hyperkube kubelet --api-servers=http://{{ master_private_ip }}:8080 --v=2 --address=0.0.0.0 --enable-server --hostname-override={{ private_ip }} --cluster-dns=10.0.0.10 --cluster-domain=cluster.local
 
 [Install]
 WantedBy=multi-user.target
