@@ -84,7 +84,7 @@
 
     - name: Download kubectl
       get_url: url=https://storage.googleapis.com/kubernetes-release/release/v1.1.1/bin/linux/amd64/kubectl
-        dest=/usr/local/bin/kubectl mode=0755
+        dest=/usr/local/bin/kubectl mode=0755 force=true
 
     - name: Reload systemd configs
       command: systemctl daemon-reload
