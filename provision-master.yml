@@ -16,6 +16,7 @@
         - vim
         - dtrx
         - htop
+        - curl
         - docker.io
         - bridge-utils
 
